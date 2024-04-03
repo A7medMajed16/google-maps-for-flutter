@@ -11,6 +11,8 @@ class CustomGoogleMap extends StatefulWidget {
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition _initialCameraPosition;
   late GoogleMapController _googleMapController;
+  String? style;
+  Set<Marker> markers = {};
 
   @override
   void initState() {
@@ -27,20 +29,18 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     super.dispose();
   }
 
-  void initMapStyle() async {
-    var nightStyle = await DefaultAssetBundle.of(context)
-        .loadString('assets/maps_styles/dark.json');
-    _googleMapController.setMapStyle(nightStyle);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         GoogleMap(
-          onMapCreated: (controller) {
+          style: style,
+          markers: markers,
+          onMapCreated: (controller) async {
             _googleMapController = controller;
-            initMapStyle();
+            style = await DefaultAssetBundle.of(context)
+                .loadString('assets/maps_styles/dark.json');
+            setState(() {});
           },
           initialCameraPosition: _initialCameraPosition,
         ),
