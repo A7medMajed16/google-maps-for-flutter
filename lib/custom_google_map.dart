@@ -59,6 +59,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 
   @override
   void dispose() {
+    
     _googleMapController.dispose();
     super.dispose();
   }
@@ -82,7 +83,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         Positioned(
           bottom: 15,
           left: 16,
-          right: 100,
+          right: 16,
           child: ElevatedButton(
             style: const ButtonStyle(
               backgroundColor: MaterialStatePropertyAll<Color?>(Colors.grey),
