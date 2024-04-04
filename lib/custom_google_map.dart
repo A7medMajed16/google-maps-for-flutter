@@ -59,7 +59,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 
   @override
   void dispose() {
-    
     _googleMapController.dispose();
     super.dispose();
   }
