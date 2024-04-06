@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_with_google_maps/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 
 class CustomGoogleMap extends StatefulWidget {
   const CustomGoogleMap({super.key});
@@ -15,6 +16,7 @@ class CustomGoogleMap extends StatefulWidget {
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition _initialCameraPosition;
   late GoogleMapController _googleMapController;
+  late Location location;
   String? _style;
   Set<Marker> markers = {};
 
@@ -25,6 +27,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       target: LatLng(30.617629214719695, 31.393107059787376),
     );
     _initMarkers();
+    location = Location();
     super.initState();
   }
 
@@ -111,5 +114,40 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         ),
       ],
     );
+  }
+
+  void updateLocation() async {
+    await checkAndRequestLocationService();
+    await checkAndRequestLocationPermission();
+    getLocationData();
+  }
+
+  Future<void> checkAndRequestLocationService() async {
+    if (!await location.serviceEnabled()) {
+      if (!await location.requestService()) {
+        //TODO: Show error message
+      }
+    }
+  }
+
+  Future<bool> checkAndRequestLocationPermission() async {
+    PermissionStatus permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.deniedForever) {
+      return false;
+    }
+    if (permissionStatus == PermissionStatus.denied) {
+      permissionStatus = await location.requestPermission();
+      if (permissionStatus != PermissionStatus.granted) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return true;
+    }
+  }
+
+  void getLocationData() async {
+    location.onLocationChanged.listen((locationData) {});
   }
 }
