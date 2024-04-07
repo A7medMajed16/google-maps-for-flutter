@@ -1,10 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_with_google_maps/place_model.dart';
+import 'package:flutter_with_google_maps/utils/location_services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+// import 'package:location/location.dart';
 
 class CustomGoogleMap extends StatefulWidget {
   const CustomGoogleMap({super.key});
@@ -15,8 +13,10 @@ class CustomGoogleMap extends StatefulWidget {
 
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition _initialCameraPosition;
-  late GoogleMapController _googleMapController;
-  late Location location;
+  late GoogleMapController? _googleMapController;
+  late LocationServices locationService;
+  // late Location location;
+  bool isFirstCall = true;
   String? _style;
   Set<Marker> markers = {};
 
@@ -26,128 +26,70 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       zoom: 16,
       target: LatLng(30.617629214719695, 31.393107059787376),
     );
-    _initMarkers();
-    location = Location();
+    locationService = LocationServices();
+    // location = Location();
     super.initState();
   }
 
-  void _initMarkers() {
-    var myMarkers = places
-        .map(
-          (placeModel) => Marker(
-            infoWindow: InfoWindow(
-              title: placeModel.name,
-            ),
-            position: placeModel.latLng,
-            markerId: MarkerId(
-              placeModel.id.toString(),
-            ),
-          ),
-        )
-        .toSet();
-    markers.addAll(myMarkers);
-  }
-
-  Future<Uint8List> getImageFromRawData(String image, double width) async {
-    ByteData imageData = await rootBundle.load(image);
-    Codec imageCodec = await instantiateImageCodec(
-      imageData.buffer.asUint8List(),
-      targetWidth: width.round(),
-    );
-    FrameInfo imageFrame = await imageCodec.getNextFrame();
-    ByteData? imageByteData =
-        await imageFrame.image.toByteData(format: ImageByteFormat.png);
-    return imageByteData!.buffer.asUint8List();
-  }
+  // void _initMarkers() {
+  //   var myMarkers = places
+  //       .map(
+  //         (placeModel) => Marker(
+  //           infoWindow: InfoWindow(
+  //             title: placeModel.name,
+  //           ),
+  //           position: placeModel.latLng,
+  //           markerId: MarkerId(
+  //             placeModel.id.toString(),
+  //           ),
+  //         ),
+  //       )
+  //       .toSet();
+  //   markers.addAll(myMarkers);
+  // }
 
   @override
   void dispose() {
-    _googleMapController.dispose();
+    _googleMapController!.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        GoogleMap(
-          style: _style,
-          markers: markers,
-          zoomControlsEnabled: false,
-          onMapCreated: (controller) async {
-            _googleMapController = controller;
-            _style = await DefaultAssetBundle.of(context)
-                .loadString('assets/maps_styles/dark.json');
-            setState(() {});
-          },
-          initialCameraPosition: _initialCameraPosition,
-        ),
-        Positioned(
-          bottom: 15,
-          left: 16,
-          right: 16,
-          child: ElevatedButton(
-            style: const ButtonStyle(
-              backgroundColor: MaterialStatePropertyAll<Color?>(Colors.grey),
-            ),
-            onPressed: () {
-              _googleMapController.animateCamera(
-                CameraUpdate.newCameraPosition(
-                  const CameraPosition(
-                    zoom: 18,
-                    target: LatLng(30.58117048262103, 31.500452761380398),
-                  ),
-                ),
-              );
-            },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Text(
-                'Change',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return GoogleMap(
+      style: _style,
+      markers: markers,
+      zoomControlsEnabled: false,
+      onMapCreated: (controller) async {
+        _googleMapController = controller;
+        initStyle();
+        _updateCurrentLocation();
+      },
+      initialCameraPosition: _initialCameraPosition,
     );
   }
 
-  void updateLocation() async {
-    await checkAndRequestLocationService();
-    await checkAndRequestLocationPermission();
-    getLocationData();
+  void initStyle() async {
+    _style = await DefaultAssetBundle.of(context)
+        .loadString('assets/maps_styles/dark.json');
   }
 
-  Future<void> checkAndRequestLocationService() async {
-    if (!await location.serviceEnabled()) {
-      if (!await location.requestService()) {
-        //TODO: Show error message
-      }
-    }
-  }
-
-  Future<bool> checkAndRequestLocationPermission() async {
-    PermissionStatus permissionStatus = await location.hasPermission();
-    if (permissionStatus == PermissionStatus.deniedForever) {
-      return false;
-    }
-    if (permissionStatus == PermissionStatus.denied) {
-      permissionStatus = await location.requestPermission();
-      if (permissionStatus != PermissionStatus.granted) {
-        return false;
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-  }
-
-  void getLocationData() async {
-    location.onLocationChanged.listen((locationData) {});
+  Future<void> _updateCurrentLocation() async {
+    Position position = await locationService.getCurrentLocation();
+    _googleMapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: 14,
+        ),
+      ),
+    );
+    markers.add(
+      Marker(
+        markerId: const MarkerId('current position'),
+        position: LatLng(position.latitude, position.longitude),
+      ),
+    );
+    setState(() {});
   }
 }
