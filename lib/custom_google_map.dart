@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_with_google_maps/utils/location_services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:location/location.dart';
 
 class CustomGoogleMap extends StatefulWidget {
   const CustomGoogleMap({super.key});
