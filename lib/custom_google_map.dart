@@ -15,7 +15,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition _initialCameraPosition;
   late GoogleMapController? _googleMapController;
   late LocationServices locationService;
-  // late Location location;
   bool isFirstCall = true;
   String? _style;
   Set<Marker> markers = {};
@@ -27,7 +26,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       target: LatLng(30.617629214719695, 31.393107059787376),
     );
     locationService = LocationServices();
-    // location = Location();
     super.initState();
   }
 
