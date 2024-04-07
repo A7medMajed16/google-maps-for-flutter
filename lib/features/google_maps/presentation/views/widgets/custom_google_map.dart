@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_with_google_maps/utils/location_services.dart';
+import 'package:flutter_with_google_maps/core/utils/location_services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -21,8 +21,8 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   @override
   void initState() {
     _initialCameraPosition = const CameraPosition(
-      zoom: 16,
-      target: LatLng(30.617629214719695, 31.393107059787376),
+      zoom: 0,
+      target: LatLng(0, 0),
     );
     locationService = LocationServices();
     super.initState();
@@ -72,22 +72,26 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 
   Future<void> _updateCurrentLocation() async {
-    Position position = await locationService.getCurrentLocation();
-    LatLng positionLatLng = LatLng(position.latitude, position.longitude);
-    _googleMapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: positionLatLng,
-          zoom: 16,
+    try {
+      Position position = await locationService.getCurrentLocation();
+      LatLng positionLatLng = LatLng(position.latitude, position.longitude);
+      _googleMapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: positionLatLng,
+            zoom: 16,
+          ),
         ),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: const MarkerId('current position'),
-        position: positionLatLng,
-      ),
-    );
-    setState(() {});
+      );
+      markers.add(
+        Marker(
+          markerId: const MarkerId('current position'),
+          position: positionLatLng,
+        ),
+      );
+      setState(() {});
+    } on LocationServiceException catch (e) {
+    } on LocationPermissionException catch (e) {
+    } catch (e) {}
   }
 }
