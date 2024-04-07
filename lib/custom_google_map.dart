@@ -76,18 +76,19 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 
   Future<void> _updateCurrentLocation() async {
     Position position = await locationService.getCurrentLocation();
+    LatLng positionLatLng = LatLng(position.latitude, position.longitude);
     _googleMapController?.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(position.latitude, position.longitude),
-          zoom: 14,
+          target: positionLatLng,
+          zoom: 16,
         ),
       ),
     );
     markers.add(
       Marker(
         markerId: const MarkerId('current position'),
-        position: LatLng(position.latitude, position.longitude),
+        position: positionLatLng,
       ),
     );
     setState(() {});
