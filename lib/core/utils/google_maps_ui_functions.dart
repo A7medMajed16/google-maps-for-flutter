@@ -14,4 +14,21 @@ class GoogleMapsUI {
         await imageFrame.image.toByteData(format: ImageByteFormat.png);
     return imageByteData!.buffer.asUint8List();
   }
+
+  // void _initMarkers() {
+  //   var myMarkers = places
+  //       .map(
+  //         (placeModel) => Marker(
+  //           infoWindow: InfoWindow(
+  //             title: placeModel.name,
+  //           ),
+  //           position: placeModel.latLng,
+  //           markerId: MarkerId(
+  //             placeModel.id.toString(),
+  //           ),
+  //         ),
+  //       )
+  //       .toSet();
+  //   markers.addAll(myMarkers);
+  // }
 }
